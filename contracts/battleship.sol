@@ -1,4 +1,4 @@
-pragma solidity >= ^0.4.2;
+pragma solidity >= 0.4.2;
 
 contract Battleship {
 
@@ -13,7 +13,6 @@ contract Battleship {
         address payable winner;
         GameState gameState;
         uint pot;
-        uint availablePot;
         mapping(address => int8[10][10]) playerGrids;
         mapping(address => bool[4]) playerShips;
     }
@@ -28,16 +27,41 @@ contract Battleship {
 
     uint8[10][10] otherBoard;
 
+    event PlayerSetName(address player, string name);
+    event GameInitialized(bytes32 gameId, address player1, bool player1GoesFirst, uint pot);
+    event GameJoined(bytes32 gameId, address player2);
+    event ShipPlaced(bytes32 gameId, address player, uint8 startX, uint8 endX, uint8 startY, uint8 endY);
+    event StateChanged(bytes32 gameId, GameState newState, string newStateString);
+
+    event MadeMove(bytes32 gameId, address currentPlayer, uint8 x, uint8 y);
+    event HitBattleShip(bytes32 gameId, address currentPlayer, uint8 x, uint8 y, int8 pieceHit);
+    event WonChallenged(bytes32 gameId, address player);
+    event GameEnded(bytes32 gameId, address winner);
+    
+    event WinningsWithdrawn(bytes32 gameId, address player);
+    event WithdrawFailed(bytes32 gameId, address player, string reason);
+
+    event IsStateCalled(bytes32 gameId, GameState currentState, GameState comparingState, bool equal);
+    event IsPlayerCalled(bytes32 gameId, address player);
+    event LogCurrentState(bytes32 gameId, GameState state);
+
     modifier isPlayer(bytes32 gameId) {
         require(msg.sender == games[gameId].player1 || msg.sender == games[gameId].player2);
         _;
     }
+    modifier isCurrentPlayer(bytes32 gameId) {
+        if(msg.sender == games[gameId].currentPlayer) _;
+    }
 
-    function abs(int number) internal constant returns(uint unumber) {
+    modifier isState(bytes32 gameId, GameState state){
+        IsStateCalled(gameId,state, games[gameId].gameState, state == games[gameId].gameState);
+        if(state == games[gameId].gameState) _;
+    }
+
+    function abs(int number) internal pure returns(uint unumber) {
         if(number < 0) return uint(-1 * number);
         return uint(number);
     }
-
     function initialiseBoard(bytes32 gameId, address player) isState(gameId, GameState.Created) internal {
         for(uint8 i = 0; i < 10; i++) {
             for(uint8 j = 0; j < 10; j++) {
@@ -46,7 +70,7 @@ contract Battleship {
         }
     }
     
-    function findOtherPlayer(bytes32 gameId,address player) internal constant returns(address) {
+    function findOtherPlayer(bytes32 gameId,address player) internal pure returns(address) {
         if(player == games[gameId].player1) return games[gameId].player2;
         return games[gameId].player1;
     }
@@ -59,7 +83,7 @@ contract Battleship {
         playerNameExists[bytesname] = true;
     }
 
-    function findPot(bytes32 gameId) constant returns(uint){
+    function findPot(bytes32 gameId) pure returns(uint){
         return games[gameId].pot;
     }
 
@@ -75,8 +99,7 @@ contract Battleship {
             address(0), // address currentPlayer;
             address(0), // address winner;
             GameState.Created, // GameState gameState;
-            msg.value, // uint pot;
-            msg.value  // uint availablePot;
+            msg.value    // uint pot;
         );
         if(goFirst){
             games[gameId].currentPlayer = msg.sender;
@@ -100,11 +123,11 @@ contract Battleship {
         StateChanged(gameId,GameState.SettingUp,"SettingUp");
     }
 
-    function showBoard(bytes32 gameId) isPlayer(gameId) constant returns(int8[10][10] board) {
+    function showBoard(bytes32 gameId) isPlayer(gameId) pure returns(int8[10][10] board) {
         return games[gameId].playerGrids[msg.sender];
     }
 
-    function showOtherPlayerBoard(bytes32 gameId) isPlayer(gameId) constant returns(int8[10][10]){
+    function showOtherPlayerBoard(bytes32 gameId) isPlayer(gameId) view returns(int8[10][10]){
         require(games[gameId].gameState == GameState.Playing || games[gameId].gameState == GameState.Finished);
         address otherPlayer = findOtherPlayer(gameId, msg.sender);
         int8[10][10] otherGrid = games[gameId].playerGrids[otherPlayer];
@@ -177,7 +200,7 @@ contract Battleship {
     function makeMove(bytes32 gameId, uint8 x, uint8 y) isState(gameId,GameState.Playing) isCurrentPlayer(gameId) {
         address otherPlayer = findOtherPlayer(gameId, msg.sender);
         require(games[gameId].playerGrids[otherPlayer][x][y] >= 0);
-        if(games[gameId].playerGrids[otherPlayer][x][y] >= 1 && games[gameId].playerGrids[otherPlayer][x][y] <= int(maxlen)) 
+        if(games[gameId].playerGrids[otherPlayer][x][y] >= 1 && games[gameId].playerGrids[otherPlayer][x][y] <= int(maxlen))
         {
             games[gameId].playerGrids[otherPlayer][x][y] = -1 * games[gameId].playerGrids[otherPlayer][x][y];
         }
@@ -189,7 +212,7 @@ contract Battleship {
         games[gameId].currentPlayer = otherPlayer;
     }
 
-    function sayWon(bytes32 gameId) isPlayer(gameId) isState(gameId,GameState.Playing) 
+    function sayWon(bytes32 gameId) isPlayer(gameId) isState(gameId,GameState.Playing) public
     {
         address otherPlayer = findOtherPlayer(gameId,msg.sender);
         // uint8 requiredToWin = 0;
@@ -205,7 +228,7 @@ contract Battleship {
                 {
                     numberHit += 1;
                 }
-            }    
+            }
         }
         if(numberHit >= requiredToWin)
         {
@@ -215,12 +238,12 @@ contract Battleship {
     }
 
 
-    function withdraw(bytes32 gameId) {
+    function withdraw(bytes32 gameId) private{
         // if(games[gameId].gameState != GameState.Finished)
         // {
         //     // WithdrawFailed(gameId,msg.sender,'This game isnt over yet');
         // }
-        require(games[gameId].gameState == GameState.Finished)
+        require(games[gameId].gameState == GameState.Finished);
         uint amount = games[gameId].availablePot;
         // if(amount > 0){
         if(msg.sender == games[gameId].winner){
@@ -239,8 +262,8 @@ contract Battleship {
         // }
     }
 
-    function () {
-        throw; // Prevents accidental sending of ether
+    function () public {
+        revert("accidental sending"); // Prevents accidental sending of ether
     }
 
 }
