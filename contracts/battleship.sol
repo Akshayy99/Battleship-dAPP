@@ -161,21 +161,10 @@ contract battleship {
     function showBoard(bytes32 gameId, uint x, uint y) public view returns(int){
         return games[gameId].playerGrids[msg.sender][x][y]; 
     }
-    function showOtherPlayerBoard(bytes32 gameId) isPlayer(gameId) public returns(int8[10][10]  memory){
+    function showOtherPlayerBoard(bytes32 gameId, uint x, uint y) isPlayer(gameId) public returns(int){
         require(games[gameId].gameState == GameState.Playing || games[gameId].gameState == GameState.Finished);
         address otherPlayer = findOtherPlayer(gameId, msg.sender);
-        int8[10][10] memory otherGrid = games[gameId].playerGrids[otherPlayer];
-        for(uint8 i = 0; i < 10; i++) 
-        {
-            for(uint j = 0; j < 10; j++) 
-            {
-                if(otherGrid[i][j] > 0 && otherGrid[i][j] <= int(maxlen))
-                    otherPlayerBoard[i][j] = 0;
-                else
-                    otherPlayerBoard[i][j] = otherGrid[i][j];
-            }
-        }
-        return otherPlayerBoard;
+        return  games[gameId].playerGrids[otherPlayer][x][y];
     }
 
     function placeShip(bytes32 gameId, uint8 startX, uint8 endX, uint8 startY, uint8 endY) isPlayer(gameId) public isState(gameId,GameState.SettingUp) {

@@ -162,26 +162,6 @@ contract('battleship', async (accounts) => {
     
   });
 
-  // it('the players should be able to move if it\'s their turn', async () => {
-
-  //   transactionData = await battleship.makeMove(gameId,0,0,{from: accounts[0]});
-  //   var bd2 = new Array(10);
-  //   for(var i =0 ; i < 10 ; i++){
-  //       bd2[i] = new Array(10);
-  //   }
-  //   for(var i  =0 ; i < 10 ; i++){
-  //       for(var j = 0; j < 10 ; j++){
-  //           bd2[i][j] = await battleship.showBoard.call(gameId, i, j,{from: accounts[1]})
-  //           bd2[i][j] = bd2[i][j].toNumber()
-  //       }
-  //   }
-  //   assert.equal(bd2[0][0],-2,'Should have been able to make that move');
-  //   let numLogs = transactionData.logs.length;
-  //   assert.equal(transactionData.logs[numLogs-1].event,'HitBattleShip','The event had the wrong name');
-  //   assert.equal(transactionData.logs[numLogs-1].args.pieceHit.toNumber(),2,'The piecewas the wrong one');
-  //   assert.equal(transactionData.logs[numLogs-1].args.x.toNumber(),0,'The x had the wrong value');
-  //   assert.equal(transactionData.logs[numLogs-1].args.y.toNumber(),0,'The y had the wrong value');
-  // });
 
   it('the player should be able to say they won at any time', async () => {
     transactionData = await battleship.sayWon(gameId,{from: accounts[0]});
@@ -204,50 +184,71 @@ contract('battleship', async (accounts) => {
     assert.equal(transactionData.logs[numLogs-1].args.reason,'This game isnt over yet','Wrong reason for withdraw failure');
   });
 
-  // it('the player should be able to win the game', async () => {
-  //   // Making moves
-  //   await battleship.makeMove(gameId, 0, 0, {from: accounts[1]});
-  //   await battleship.makeMove(gameId, 1, 0, {from: accounts[0]});
-  //   await battleship.makeMove(gameId, 1, 0, {from: accounts[1]});
-  //   await battleship.makeMove(gameId, 0, 1, {from: accounts[0]});
-  //   await battleship.makeMove(gameId, 2, 0, {from: accounts[1]});
-  //   await battleship.makeMove(gameId, 1, 1, {from: accounts[0]});
-  //   await battleship.makeMove(gameId, 9, 0, {from: accounts[1]});
-  //   await battleship.makeMove(gameId, 8, 8, {from: accounts[0]});
-  //   await battleship.makeMove(gameId, 3, 0, {from: accounts[1]});
-  //   await battleship.makeMove(gameId, 2, 1, {from: accounts[0]});
-  //   await battleship.makeMove(gameId, 4, 0, {from: accounts[1]});
-  //   await battleship.makeMove(gameId, 0, 2, {from: accounts[0]});
-  //   await battleship.makeMove(gameId, 5, 0, {from: accounts[1]});
-  //   await battleship.makeMove(gameId, 1, 2, {from: accounts[0]});
-  //   await battleship.makeMove(gameId, 6, 0, {from: accounts[1]});
-  //   await battleship.makeMove(gameId, 2, 2, {from: accounts[0]});
-  //   await battleship.makeMove(gameId, 7, 0, {from: accounts[1]});
-  //   await battleship.makeMove(gameId, 3, 2, {from: accounts[0]});
-  //   await battleship.makeMove(gameId, 8, 0, {from: accounts[1]});
-  //   await battleship.makeMove(gameId, 0, 3, {from: accounts[0]});
-  //   await battleship.makeMove(gameId, 9, 0, {from: accounts[1]});
-  //   await battleship.makeMove(gameId, 1, 3, {from: accounts[0]});
-  //   await battleship.makeMove(gameId, 0, 1, {from: accounts[1]});
-  //   await battleship.makeMove(gameId, 2, 3, {from: accounts[0]});
-  //   await battleship.makeMove(gameId, 0, 2, {from: accounts[1]});
-  //   await battleship.makeMove(gameId, 3, 3, {from: accounts[0]});
-  //   await battleship.makeMove(gameId, 0, 3, {from: accounts[1]});
-  //   await battleship.makeMove(gameId, 4, 3, {from: accounts[0]});
+  it('the player should be able to win the game', async () => {
+    // Making moves
+    transactionData = await battleship.makeMove(gameId,0,0,{from: accounts[0]});
+    await battleship.makeMove(gameId, 0, 0, {from: accounts[1]});
+    await battleship.makeMove(gameId, 1, 0, {from: accounts[0]});
+    await battleship.makeMove(gameId, 1, 0, {from: accounts[1]});
+    await battleship.makeMove(gameId, 0, 1, {from: accounts[0]});
+    await battleship.makeMove(gameId, 2, 0, {from: accounts[1]});
+    await battleship.makeMove(gameId, 1, 1, {from: accounts[0]});
+    await battleship.makeMove(gameId, 9, 0, {from: accounts[1]});
+    await battleship.makeMove(gameId, 8, 8, {from: accounts[0]});
+    await battleship.makeMove(gameId, 3, 0, {from: accounts[1]});
+    await battleship.makeMove(gameId, 2, 1, {from: accounts[0]});
+    await battleship.makeMove(gameId, 4, 0, {from: accounts[1]});
+    await battleship.makeMove(gameId, 0, 2, {from: accounts[0]});
+    await battleship.makeMove(gameId, 5, 0, {from: accounts[1]});
+    await battleship.makeMove(gameId, 1, 2, {from: accounts[0]});
+    await battleship.makeMove(gameId, 6, 0, {from: accounts[1]});
+    await battleship.makeMove(gameId, 2, 2, {from: accounts[0]});
+    await battleship.makeMove(gameId, 7, 0, {from: accounts[1]});
+    await battleship.makeMove(gameId, 3, 2, {from: accounts[0]});
+    await battleship.makeMove(gameId, 8, 0, {from: accounts[1]});
+    await battleship.makeMove(gameId, 0, 3, {from: accounts[0]});
+    await battleship.makeMove(gameId, 9, 0, {from: accounts[1]});
+    await battleship.makeMove(gameId, 1, 3, {from: accounts[0]});
+    await battleship.makeMove(gameId, 0, 1, {from: accounts[1]});
+    await battleship.makeMove(gameId, 2, 3, {from: accounts[0]});
+    await battleship.makeMove(gameId, 0, 2, {from: accounts[1]});
+    await battleship.makeMove(gameId, 3, 3, {from: accounts[0]});
+    await battleship.makeMove(gameId, 0, 3, {from: accounts[1]});
+    await battleship.makeMove(gameId, 4, 3, {from: accounts[0]});
 
-  //   let board1 = await battleship.showBoard(gameId, {from: accounts[0]});
-  //   let board2 = await battleship.showBoard(gameId, {from: accounts[1]});
+ 
+    var bd1 = new Array(10);
+    for(var i =0 ; i < 10 ; i++){
+        bd1[i] = new Array(10);
+    }
+    for(var i  =0 ; i < 10 ; i++){
+        for(var j = 0; j < 10 ; j++){
+            bd1[i][j] = await battleship.showBoard.call(gameId, i, j,{from: accounts[0]})
+            bd1[i][j] = bd1[i][j].toNumber()
+        }
+    }
 
-  //   let board1from2 = await battleship.showOtherPlayerBoard(gameId, {from: accounts[1]});
+   
+    var bd2 = new Array(10);
+    for(var i =0 ; i < 10 ; i++){
+        bd2[i] = new Array(10);
+    }
+    for(var i  =0 ; i < 10 ; i++){
+        for(var j = 0; j < 10 ; j++){
+            bd2[i][j] = await battleship.showBoard.call(gameId, i, j,{from: accounts[1]})
+            bd2[i][j] = bd2[i][j].toNumber()
+        }
+    }
+    // let board1from2 = await battleship.showOtherPlayerBoard(gameId, {from: accounts[1]});
 
-  //   transactionData = await battleship.sayWon(gameId, {from: accounts[0]});
+    transactionData = await battleship.sayWon(gameId, {from: accounts[0]});
 
-  //   let numLogs = transactionData.logs.length;
+    let numLogs = transactionData.logs.length;
 
 
-  //   assert.equal(transactionData.logs[numLogs-1].event, 'GameEnded', 'The event had the wrong name');
-  //   assert.equal(transactionData.logs[numLogs-1].args.winner, accounts[0], 'The wrong player was assigned to event');
-  // });
+    assert.equal(transactionData.logs[numLogs-1].event, 'GameEnded', 'The event had the wrong name');
+    assert.equal(transactionData.logs[numLogs-1].args.winner, accounts[0], 'The wrong player was assigned to event');
+  });
 
   it('the winner should be able to withdraw funds', async () => {
     transactionData = await battleship.withdraw(gameId,{from: accounts[1]});
