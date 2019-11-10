@@ -21,7 +21,7 @@ contract battleship {
     mapping(address => string) public playerNames;
     mapping(bytes32 => bool) public playerNameExists;
     mapping(bytes32 => Game) public games;
-    mapping(address => bytes32[]) playerGames;
+    mapping(address => bytes32[]) public playerGames;
 
     uint8 public maxlen = 5;
     uint8 public minlen = 2;
@@ -120,7 +120,25 @@ contract battleship {
     function findPot(bytes32 gameId) view public returns(uint){
         return games[gameId].pot;
     }
-
+    function bytes32ToString(bytes32 x) public view returns (string memory) {
+    bytes memory bytesString = new bytes(32);
+    uint charCount = 0;
+    for (uint j = 0; j < 32; j++) {
+        byte char = byte(bytes32(uint(x) * 2 ** (8 * j)));
+        if (char != 0) {
+            bytesString[charCount] = char;
+            charCount++;
+        }
+    }
+    bytes memory bytesStringTrimmed = new bytes(charCount);
+    for (uint j = 0; j < charCount; j++) {
+        bytesStringTrimmed[j] = bytesString[j];
+    }
+    return string(bytesStringTrimmed);
+}
+    function returngameid() public view returns(string memory){
+        return bytes32ToString(playerGames[msg.sender][0]);
+    }
     function newGame(bool goFirst) hasName public payable returns(bytes32){
         require(msg.value > 0);
         // bytes32 gameId = keccak256(msg.sender, block.number);
