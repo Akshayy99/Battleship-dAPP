@@ -33,7 +33,7 @@ contract battleship {
     event GameJoined(bytes32 gameId, address player2);
     event ShipPlaced(bytes32 gameId, address player, uint8 startX, uint8 endX, uint8 startY, uint8 endY);
     event StateChanged(bytes32 gameId, GameState newState, string newStateString);
-
+    event GameMade(string testing, bytes32 gameId );
     event MadeMove(bytes32 gameId, address currentPlayer, uint8 x, uint8 y);
     event HitBattleShip(bytes32 gameId, address currentPlayer, uint8 x, uint8 y, int8 pieceHit);
     event WonChallenged(bytes32 gameId, address player);
@@ -139,10 +139,11 @@ contract battleship {
     function returngameid() public view returns(string memory){
         return bytes32ToString(playerGames[msg.sender][0]);
     }
-    function newGame(bool goFirst) hasName public payable returns(bytes32){
+    function newGame(bool goFirst) public hasName payable returns(bytes32){
         require(msg.value > 0);
         // bytes32 gameId = keccak256(msg.sender, block.number);
         bytes32 gameId = keccak256(abi.encodePacked(msg.sender, block.number));
+        emit GameMade("testing", gameId);
         playerGames[msg.sender].push(gameId);
         games[gameId] = Game(
             msg.sender, // address player1;
@@ -162,7 +163,7 @@ contract battleship {
         return gameId;
     }
 
-    function joinGame(bytes32 gameId) hasName public isState(gameId, GameState.Created) payable {
+    function joinGame(bytes32 gameId) public hasName  isState(gameId, GameState.Created) payable {
         require(games[gameId].player2 == address(0));
         require(msg.value == games[gameId].pot);
         games[gameId].player2 = msg.sender;
@@ -177,15 +178,15 @@ contract battleship {
         emit StateChanged(gameId,GameState.SettingUp,"SettingUp");
     }
     function showBoard(bytes32 gameId, uint x, uint y) public view returns(int){
-        return games[gameId].playerGrids[msg.sender][x][y]; 
+        return games[gameId].playerGrids[msg.sender][x][y];
     }
-    function showOtherPlayerBoard(bytes32 gameId, uint x, uint y) isPlayer(gameId) public returns(int){
+    function showOtherPlayerBoard(bytes32 gameId, uint x, uint y) public isPlayer(gameId) returns(int){
         require(games[gameId].gameState == GameState.Playing || games[gameId].gameState == GameState.Finished);
         address otherPlayer = findOtherPlayer(gameId, msg.sender);
         return  games[gameId].playerGrids[otherPlayer][x][y];
     }
 
-    function placeShip(bytes32 gameId, uint8 startX, uint8 endX, uint8 startY, uint8 endY) isPlayer(gameId) public isState(gameId,GameState.SettingUp) {
+    function placeShip(bytes32 gameId, uint8 startX, uint8 endX, uint8 startY, uint8 endY) public isPlayer(gameId) isState(gameId,GameState.SettingUp) {
         
         require(startX == endX || startY == endY);
         require(startX < endX || startY < endY);

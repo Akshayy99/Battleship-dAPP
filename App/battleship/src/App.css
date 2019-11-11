@@ -3,20 +3,15 @@
   text-align: center;
   min-height: 100vh;
 }
-
-.App-logo {
-  animation: App-logo-spin infinite 20s linear;
-  height: 40vmin;
-  pointer-events: none;
-}
-
 .App-header {
   min-height: 20vh;
+  max-height: 40vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   font-size: calc(40px + 2vmin);
+  padding-bottom: 30vh;
 }
 
 .App-link {
@@ -27,10 +22,33 @@
   
   color: white;
   font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
-  padding-bottom: 80vh;
 }
 .forms {
   padding: 20%;
+}
+.form-heading{
+  color: azure;
+  font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+  font-size: 3vw;
+  margin: 2%;
+}
+.stepno{
+  color: darksalmon;
+  font-size: 1.5vw;
+  font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+}
+.form_f{
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  color: chartreuse;
+  font-size: 2vw;
+  margin: 2%;
+}
+.form-control{
+  width: 38vw;
+  height: 3vh;
+  margin: 1%;
+  font-size: 3vh;
+  justify-content: center;
 }
 @keyframes App-logo-spin {
   from {
@@ -39,4 +57,8 @@
   to {
     transform: rotate(360deg);
   }
+}
+.cords_form {
+  display: flex;
+  padding-bottom: 50vh;
 }
