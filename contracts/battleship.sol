@@ -188,55 +188,57 @@ contract battleship {
 
     function placeShip(bytes32 gameId, uint8 startX, uint8 endX, uint8 startY, uint8 endY) public isPlayer(gameId) isState(gameId,GameState.SettingUp) {
         
-        require(startX == endX || startY == endY);
-        require(startX < endX || startY < endY);
+        require(startX == endX || startY == endY, 'placement error');
+        require(startX < endX || startY < endY, "placement error0");
         require(startX  < 10 && startX  >= 0 &&
                 endX    < 10 && endX    >= 0 &&
                 startY  < 10 && startY  >= 0 &&
-                endY    < 10 && endY    >= 0);
+                endY    < 10 && endY    >= 0, 'placement error2');
         for(uint8 x = startX; x <= endX; x++) 
         {
             for(uint8 y = startY; y <= endY; y++) 
             {
-                require(games[gameId].playerGrids[msg.sender][x][y] == 0);
-            }   
+                require(games[gameId].playerGrids[msg.sender][x][y] == 0, 'placement error3');
+            }
         }
         uint8 boatLength = 1;
-        if(startX == endX) 
+        if(startX == endX)
         {
             boatLength += uint8(abs(int(startY)-int(endY)));
         }
-        else if(startY == endY) 
+        else if(startY == endY)
         {
             boatLength += uint8(abs(int(startX)-int(endX)));
         }
 
-        require(boatLength <= maxlen && boatLength >= minlen);
-        require(!(games[gameId].playerShips[msg.sender][boatLength-minlen]));
+        require(boatLength <= maxlen && boatLength >= minlen, 'length error');
+        require(!(games[gameId].playerShips[msg.sender][boatLength-minlen]), "ship already placed");
 
         games[gameId].playerShips[msg.sender][boatLength - minlen] = true;
 
-        for(uint8 x = startX; x <= endX; x++) 
+        for(uint8 x = startX; x <= endX; x++)
         {
-            for( uint8 y = startY; y <= endY; y++) 
+            for( uint8 y = startY; y <= endY; y++)
             {
                 games[gameId].playerGrids[msg.sender][x][y] = int8(boatLength);
-            }   
+            }
         }
     }
 
-    function finishPlacing(bytes32 gameId) isPlayer(gameId) public isState(gameId,GameState.SettingUp) {
+    function finishPlacing(bytes32 gameId) public isPlayer(gameId) isState(gameId,GameState.SettingUp) returns(bool){
         bool ready = true;
-        for(uint8 i = 0; i <= maxlen - minlen; i++) 
+        for(uint8 i = 0; i <= maxlen - minlen; i++)
         {
-            if(!games[gameId].playerShips[games[gameId].player1][i] || !games[gameId].playerShips[games[gameId].player2][i]) 
+            if(!games[gameId].playerShips[games[gameId].player1][i] || !games[gameId].playerShips[games[gameId].player2][i])
             {
                 ready = false;
                 break;
             }
         }
-        require(ready);
-        games[gameId].gameState = GameState.Playing;
+        if(ready==true){
+            games[gameId].gameState = GameState.Playing;
+        }
+        return ready;
     }
 
     function makeMove(bytes32 gameId, uint8 x, uint8 y) public isState(gameId,GameState.Playing) isCurrentPlayer(gameId) {

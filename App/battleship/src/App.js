@@ -34,12 +34,13 @@ class App extends React.Component {
     btship : "NONE",
     pname: "Enter your name",
     gids : [],
-    gameInit : true,
+    gameState : 1,
     currentStep: 1,
     size2:  '',
     size3:  '',
     size4:  '',
     size5:  '',
+    g_id : ''
   };
   
   keccak256 = (...args) => {
@@ -58,12 +59,12 @@ class App extends React.Component {
         return ''
       }
     })
-  
+    
     args = args.join('')
-  
+    
     return web3.utils.sha3(args, { encoding: 'hex' })
   }
-
+  
   async loadData(){
     const web3 = new Web3(window.web3.currentProvider)
     const accounts = await web3.eth.getAccounts()
@@ -79,25 +80,28 @@ class App extends React.Component {
     }
     firebase.database().ref('/gameId').push(topush);
     // alert('waiting for other player please wait and bring shawarma')
-    this.setState({gameInit:true})
+    this.setState({gameState:2})
+    this.setState({g_id:gid})
     
   }
   joinGame() {
     const instance = firebase.database().ref('gameId');
-    instance.on('value', (snapshot) => {
-      let ids = snapshot.val();
-      if(ids == null){
+    instance.on('value', async (snapshot) => {
+      let idx = snapshot.val();
+      if(idx == null){
         alert('Oh! no players are there!!')
         return;
       }
-      ids = Object.values(ids)
+      let ids = Object.values(idx)
       if(ids.length == 0){
         alert('Oh! no players are there!!')
         return;
       }
       this.setState({gids:ids})
-      this.state.btship.methods.joinGame(ids[0]['gameId']).send(10000, {from:this.state.account});
-      this.setState({gameInit:true})
+      this.setState({g_id:ids[0]['gameId']})
+      await this.state.btship.methods.joinGame(ids[0]['gameId']).send(10000, {from:this.state.account});
+      // firebase.database().ref({idx}).remove();
+      this.setState({gameState:2})
       
     });
     
@@ -110,7 +114,7 @@ class App extends React.Component {
   async enterName(){
     await this.state.btship.methods.setName(this.state.pname).send({from:this.state.account});
   }
-
+  
   handleChange = (event) => {
     this.setState({pname: event.target.value});
   }
@@ -120,20 +124,122 @@ class App extends React.Component {
       [name] : value
     })    
   }
-  handleSubmit = event => {
-    // const { email, username, password } = this.state
-    const ship2 = this.state.size2;
-    const ship3 = this.state.size3;
-    const ship4 = this.state.size4;
-    const ship5 = this.state.size5;
-    alert(`Your ship positions are: \n 
-           s2: ${ship2} \n 
-           s3: ${ship3} \n 
-           s4: ${ship4} \n 
-           s5: ${ship5} \n`)
+  async handleSubmit(event){
+    const ship5 = this.state.size5.split(" ");
+    if(ship5.length != 4){
+      alert('put cords correctly')
+      return;
+    }
+    let startX = ship5[0];
+    let endX = ship5[1];
+    let startY = ship5[2];
+    let endY = ship5[3];
+    let flag = true;
+    if(!(startX == endX || startY == endY)){flag = false}
+    if(!(startX < endX || startY < endY)){flag = false}
+    if(!(startX  < 10 && startX  >= 0 &&
+            endX    < 10 && endX    >= 0 &&
+            startY  < 10 && startY  >= 0 &&
+            endY    < 10 && endY    >= 0)){flag = false}
+    if(!flag){
+      alert('put cords correctly')
+      return;
+    } 
+    await this.state.btship.methods.placeShip(this.state.g_id,ship5[0],ship5[1],ship5[2],ship5[3]).send({from: this.state.account});
+    let out = await this.state.btship.methods.finishPlacing(this.state.g_id).call({from:this.state.account})
+    while(out==false){
+      out = await this.state.btship.methods.finishPlacing(this.state.g_id).call({from:this.state.account})
+      this.setState({gameState:3})
+    }
+    this.setState({gameState:4})
   }
-  _next = () => {
+  async _next(){
     let currentStep = this.state.currentStep
+    if( currentStep==1){
+      const ship2 = this.state.size2.split(" ")
+      if(ship2.length != 4){
+        alert('put cords correctly')
+        return;
+      }
+      let startX = ship2[0];
+      let endX = ship2[1];
+      let startY = ship2[2];
+      let endY = ship2[3];
+      let flag = true;
+      if(!(startX == endX || startY == endY)){flag = false}
+      if(!(startX < endX || startY < endY)){flag = false}
+      if(!(startX  < 10 && startX  >= 0 &&
+              endX    < 10 && endX    >= 0 &&
+              startY  < 10 && startY  >= 0 &&
+              endY    < 10 && endY    >= 0)){flag = false}
+      if(!flag){
+        alert('put cords correctly')
+        return;
+      } 
+      await this.state.btship.methods.placeShip(this.state.g_id,ship2[0],ship2[1],ship2[2],ship2[3]).send({from: this.state.account},
+       function(error,thash){
+         console.log(error);
+         console.log("erro");
+         console.log(thash);
+       }
+      )
+    }
+    if( currentStep==2){
+      const ship3 = this.state.size3.split(" ")
+      if(ship3.length != 4){
+        alert('put cords correctly')
+        return;
+      }
+      let startX = ship3[0];
+      let endX = ship3[1];
+      let startY = ship3[2];
+      let endY = ship3[3];
+      let flag = true;
+      if(!(startX == endX || startY == endY)){flag = false}
+      if(!(startX < endX || startY < endY)){flag = false}
+      if(!(startX  < 10 && startX  >= 0 &&
+              endX    < 10 && endX    >= 0 &&
+              startY  < 10 && startY  >= 0 &&
+              endY    < 10 && endY    >= 0)){flag = false}
+      if(!flag){
+        alert('put cords correctly')
+        return;
+      } 
+      await this.state.btship.methods.placeShip(this.state.g_id,ship3[0],ship3[1],ship3[2],ship3[3]).send({from: this.state.account});
+    }
+    if( currentStep==3){
+      const ship4 = this.state.size4.split(" ")
+      if(ship4.length != 4){
+        alert('put cords correctly')
+        return;
+      }
+
+      let startX = ship4[0];
+      let endX = ship4[1];
+      let startY = ship4[2];
+      let endY = ship4[3];
+      let flag = true;
+      if(!(startX == endX || startY == endY)){flag = false}
+      if(!(startX < endX || startY < endY)){flag = false}
+      if(!(startX  < 10 && startX  >= 0 &&
+              endX    < 10 && endX    >= 0 &&
+              startY  < 10 && startY  >= 0 &&
+              endY    < 10 && endY    >= 0)){flag = false}
+      if(!flag){
+        alert('put cords correctly')
+        return;
+      } 
+      await this.state.btship.methods.placeShip(this.state.g_id,ship4[0],ship4[1],ship4[2],ship4[3]).send({from: this.state.account});
+    }  
+    if( currentStep==4){
+      const ship5 = this.state.size5.split(" ")
+      if(ship5.length != 4){
+        alert('put cords correctly')
+        return;
+      }
+      await this.state.btship.methods.placeShip(this.state.g_id,ship5[0],ship5[1],ship5[2],ship5[3]).send({from: this.state.account});
+
+    }
     currentStep = currentStep >= 3? 4: currentStep + 1
     this.setState({
       currentStep: currentStep
@@ -268,7 +374,7 @@ class App extends React.Component {
   }
   
   render(){
-    if(this.state.gameInit == false){
+    if(this.state.gameState == 1){
     return (
       <div className="App">
         <header className="App-header">
@@ -294,7 +400,7 @@ class App extends React.Component {
     </div>
     );
   }
-  else{
+  else if(this.state.gameState==2){
     return(
       <div className="App">
       <header className="App-header">
@@ -336,6 +442,17 @@ class App extends React.Component {
   </div>
 
    );
+  }
+  else if(this.state.gameState==3){
+    return (
+      <div className="App">
+        <header className="App-header">
+          <span className="header">Moves Placed Succesfully!!!</span>
+        </header>
+        <h1 className="form-heading" >Waiting For Other player to place ship🧙‍♂️</h1>
+
+    </div>
+    );
   }
   }
 }

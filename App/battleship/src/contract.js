@@ -1,6 +1,6 @@
 import web3 from './web3'
 
-const deployeAddress = '0x55717f63ebfcfcf13004c58d701d42e21fafead0';
+const deployeAddress = '0x0c0786df8c6427b8e2ccd346d5626dd4cfa1430d';
 
 const deployedAbi = [
 	{
@@ -377,7 +377,13 @@ const deployedAbi = [
 			}
 		],
 		"name": "finishPlacing",
-		"outputs": [],
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
 		"payable": false,
 		"stateMutability": "nonpayable",
 		"type": "function"
