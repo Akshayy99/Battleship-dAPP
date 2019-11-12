@@ -40,7 +40,8 @@ class App extends React.Component {
     size3:  '',
     size4:  '',
     size5:  '',
-    g_id : ''
+    g_id : '',
+    move : ''
   };
   
   keccak256 = (...args) => {
@@ -73,8 +74,15 @@ class App extends React.Component {
   }
   
   async startGame () {
-    var txn = await this.state.btship.methods.newGame(true).send(60000000,{from:this.state.account}); console.log(txn);
-    var gid = this.keccak256(this.state.account, txn['blockNumber']); console.log(gid); 
+    var txn = await this.state.btship.methods.newGame(true).send(60000000,{from:this.state.account});
+    const web3 = new Web3(window.web3.currentProvider)
+    var gid = this.state.account;
+    // var gid = web3.utils.toAscii(this.state.account);
+    // var temp = await this.state.btship.methods.returngameid().call({from:this.state.account})
+    // console.log("game---------id")
+    // console.log(temp)
+    console.log("gid")
+    console.log(gid)
     var topush = {
       gameId : gid
     }
@@ -97,18 +105,18 @@ class App extends React.Component {
         alert('Oh! no players are there!!')
         return;
       }
+      else{
       this.setState({gids:ids})
       this.setState({g_id:ids[0]['gameId']})
       await this.state.btship.methods.joinGame(ids[0]['gameId']).send(10000, {from:this.state.account});
       // firebase.database().ref({idx}).remove();
-      this.setState({gameState:2})
+      this.setState({gameState:2})}
       
     });
     
   }
   
   printGids= () =>{
-    // console.log(this.state.gids[0])
     console.log(this.state.gids[0]['gameId'])
   }
   async enterName(){
@@ -124,10 +132,17 @@ class App extends React.Component {
       [name] : value
     })    
   }
+
+  handleMove = (event) => {
+    const {name, value} = event.target
+    this.setState({
+      [name] : value
+    })    
+  }
   async handleSubmit(event){
     const ship5 = this.state.size5.split(" ");
     if(ship5.length != 4){
-      alert('put cords correctly')
+      alert('put cords correctly');
       return;
     }
     let startX = ship5[0];
@@ -146,9 +161,11 @@ class App extends React.Component {
       return;
     } 
     await this.state.btship.methods.placeShip(this.state.g_id,ship5[0],ship5[1],ship5[2],ship5[3]).send({from: this.state.account});
-    let out = await this.state.btship.methods.finishPlacing(this.state.g_id).call({from:this.state.account})
+    var out = await this.state.btship.methods.finishPlacing(this.state.g_id).call({from:this.state.account})
+    
     while(out==false){
       out = await this.state.btship.methods.finishPlacing(this.state.g_id).call({from:this.state.account})
+      console.log(out)
       this.setState({gameState:3})
     }
     this.setState({gameState:4})
@@ -161,6 +178,11 @@ class App extends React.Component {
         alert('put cords correctly')
         return;
       }
+      var cpl = await this.state.btship.methods.findOtherPlayer(this.state.g_id, this.state.account).call({from:this.state.account});
+      console.log('cpl');
+      console.log(cpl);
+      console.log('this.state.account');
+      console.log(this.state.account);
       let startX = ship2[0];
       let endX = ship2[1];
       let startY = ship2[2];
@@ -176,13 +198,11 @@ class App extends React.Component {
         alert('put cords correctly')
         return;
       } 
-      await this.state.btship.methods.placeShip(this.state.g_id,ship2[0],ship2[1],ship2[2],ship2[3]).send({from: this.state.account},
-       function(error,thash){
-         console.log(error);
-         console.log("erro");
-         console.log(thash);
-       }
-      )
+      await this.state.btship.methods.placeShip(this.state.g_id,ship2[0],ship2[1],ship2[2],ship2[3]).send({from: this.state.account});
+      //  function(error,thash){
+      //    console.log(error);
+      //    console.log("erro");
+      //    console.log(thash);
     }
     if( currentStep==2){
       const ship3 = this.state.size3.split(" ")
@@ -282,6 +302,55 @@ class App extends React.Component {
     }
     return null;
   }
+  headers=()=>{
+    let curplayer = this.state.btship.methods.status(this.state.g_id).call({from:this.state.account});
+    if(curplayer == this.state.account){
+      return(
+        <h1 className="form-heading">Its Your turn </h1>
+      );
+    }
+    else{
+      return(
+        <h1 className="form-heading">Wait for opponents turn</h1>
+      );
+    }
+  }
+  moveBtn=()=>{
+    let curplayer = this.state.btship.methods.status(this.state.g_id).call({from:this.state.account});
+    if(curplayer == this.state.account){
+      return (
+        <ButtonGroup variant="contained" color="primary" size="large" aria-label="full-width contained primary button group">
+        <Button onClick = {()=>this._next()} >Doit!</Button>
+      </ButtonGroup>
+      )
+    }
+    // else{
+    //   return (
+    //     <ButtonGroup variant="contained" color="primary" size="large" aria-label="full-width contained primary button group">
+    //     <Button onClick = {()=>alert('Not your turn mate')} >Doit!</Button>
+    //   </ButtonGroup>
+    //   )
+    // }
+    return null;
+  }
+
+  Move=()=> {
+    return(
+      <div className="form_f">
+        <label>Move coordinates (space separated) </label>
+        <br></br>
+        <input
+          className="form-control"
+          id="move"
+          name="move"
+          type="text"
+          placeholder="Enter Move"
+          value={this.state.move}
+          onChange={this.handleMove}
+          />
+      </div>
+    );
+  }
   Step1=()=> {
     if (this.state.currentStep !== 1) {
       return null
@@ -306,9 +375,6 @@ class App extends React.Component {
     if (this.state.currentStep !== 2) {
       return null
     } 
-    
-    console.log("this.state.currentStep")
-    console.log(this.state.currentStep)
     return(
       <div className="form_f">
         <label htmlFor="ship3">Ship Size 3 : coordinates (space separated)</label>
@@ -329,8 +395,6 @@ class App extends React.Component {
     if (this.state.currentStep !== 3) {
       return null
     } 
-    console.log("this.state.currentStep")
-    console.log(this.state.currentStep)
     return(
       <div className="form_f">
         <label htmlFor="ship2">Ship Size 4 : coordinates (space separated)</label>
@@ -351,8 +415,6 @@ class App extends React.Component {
     if (this.state.currentStep !== 4) {
       return null
     } 
-    console.log("this.state.currentStep")
-    console.log(this.state.currentStep)
     return(
       <div className="form_f">
         <label htmlFor="ship2">Ship Size 5 : coordinates (space separated) </label>
@@ -450,6 +512,25 @@ class App extends React.Component {
           <span className="header">Moves Placed Succesfully!!!</span>
         </header>
         <h1 className="form-heading" >Waiting For Other player to place ship🧙‍♂️</h1>
+
+    </div>
+    );
+  }
+  else if(this.state.gameState==4){
+    return (
+      <div className="App">
+        <header className="App-header">
+          <span className="header">Time to make your move!!!</span>
+        </header>
+        {/* <h1 className="form-heading" >ENTER YOUR MOVE🧙‍♂️</h1> */}
+        {this.headers()}
+        <form onSubmit={this.handleSubmit}>
+          <this.Move 
+            handleChange={this.handleMove}
+            value={this.state.move}
+          />
+          {this.moveBtn()}
+        </form>
 
     </div>
     );

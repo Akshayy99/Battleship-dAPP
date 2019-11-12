@@ -104,7 +104,7 @@ contract battleship {
         }
     }
     
-    function findOtherPlayer(bytes32 gameId,address player) internal view returns(address) {
+    function findOtherPlayer(bytes32 gameId,address player) public view returns(address) {
         if(player == games[gameId].player1) return games[gameId].player2;
         return games[gameId].player1;
     }
@@ -135,14 +135,19 @@ contract battleship {
         bytesStringTrimmed[j] = bytesString[j];
     }
     return string(bytesStringTrimmed);
-}
-    function returngameid() public view returns(string memory){
-        return bytes32ToString(playerGames[msg.sender][0]);
     }
+    function returngameid() public view returns(bytes32){
+        return playerGames[msg.sender][0];
+    }
+//     function toBytes(address a) public pure returns (bytes memory) {
+//     return abi.encodePacked(a);
+// }
+
     function newGame(bool goFirst) public hasName payable returns(bytes32){
         require(msg.value > 0);
         // bytes32 gameId = keccak256(msg.sender, block.number);
-        bytes32 gameId = keccak256(abi.encodePacked(msg.sender, block.number));
+        // bytes32 gameId = keccak256(abi.encodePacked(msg.sender, block.number));
+        bytes32 gameId = bytes32(uint256(msg.sender) << 96);
         emit GameMade("testing", gameId);
         playerGames[msg.sender].push(gameId);
         games[gameId] = Game(
@@ -224,7 +229,6 @@ contract battleship {
             }
         }
     }
-
     function finishPlacing(bytes32 gameId) public isPlayer(gameId) isState(gameId,GameState.SettingUp) returns(bool){
         bool ready = true;
         for(uint8 i = 0; i <= maxlen - minlen; i++)
@@ -239,6 +243,10 @@ contract battleship {
             games[gameId].gameState = GameState.Playing;
         }
         return ready;
+    }
+
+    function status(bytes32 gameId) public view returns(address){
+        return games[gameId].currentPlayer;
     }
 
     function makeMove(bytes32 gameId, uint8 x, uint8 y) public isState(gameId,GameState.Playing) isCurrentPlayer(gameId) {

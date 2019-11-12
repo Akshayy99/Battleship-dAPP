@@ -1,8 +1,34 @@
 import web3 from './web3'
 
-const deployeAddress = '0x0c0786df8c6427b8e2ccd346d5626dd4cfa1430d';
+const deployeAddress = '0x2c41de68788412d9cf3ec1928c215f4b5ed2ef02';
 
 const deployedAbi = [
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"internalType": "bytes32",
+				"name": "gameId",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "address",
+				"name": "player",
+				"type": "address"
+			}
+		],
+		"name": "findOtherPlayer",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
 	{
 		"constant": true,
 		"inputs": [
@@ -93,6 +119,27 @@ const deployedAbi = [
 		"type": "function"
 	},
 	{
+		"constant": true,
+		"inputs": [
+			{
+				"internalType": "bytes32",
+				"name": "gameId",
+				"type": "bytes32"
+			}
+		],
+		"name": "status",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
 		"constant": false,
 		"inputs": [
 			{
@@ -154,9 +201,9 @@ const deployedAbi = [
 		"name": "returngameid",
 		"outputs": [
 			{
-				"internalType": "string",
+				"internalType": "bytes32",
 				"name": "",
-				"type": "string"
+				"type": "bytes32"
 			}
 		],
 		"payable": false,
