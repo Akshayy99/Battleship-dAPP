@@ -1,7 +1,6 @@
 import React, {Component} from 'react';
 import './App.css';
-import Web3 from 'web3'
-// import web3 from './web3'
+import web3 from './web3'
 import battleship from './contract.js'
 import { createStyles, Theme, makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
@@ -41,11 +40,13 @@ class App extends React.Component {
     size4:  '',
     size5:  '',
     g_id : '',
-    move : ''
+    move : '',
+    currentPlayer : '',
+    Opp : '',
+    Winner : ''
   };
   
   keccak256 = (...args) => {
-    const web3 = new Web3(window.web3.currentProvider)
     args = args.map(arg => {
       if (typeof arg === 'string') {
         if (arg.substring(0, 2) === '0x') {
@@ -67,52 +68,48 @@ class App extends React.Component {
   }
   
   async loadData(){
-    const web3 = new Web3(window.web3.currentProvider)
     const accounts = await web3.eth.getAccounts()
     this.setState({ account: accounts[0] })
     this.setState({ btship : battleship })
   }
   
   async startGame () {
-    var txn = await this.state.btship.methods.newGame(true).send(60000000,{from:this.state.account});
-    const web3 = new Web3(window.web3.currentProvider)
-    var gid = this.state.account;
-    // var gid = web3.utils.toAscii(this.state.account);
-    // var temp = await this.state.btship.methods.returngameid().call({from:this.state.account})
-    // console.log("game---------id")
-    // console.log(temp)
-    console.log("gid")
-    console.log(gid)
-    var topush = {
-      gameId : gid
-    }
-    firebase.database().ref('/gameId').push(topush);
-    // alert('waiting for other player please wait and bring shawarma')
-    this.setState({gameState:2})
-    this.setState({g_id:gid})
+    // await battleship.methods.newGame(true).send(60000000,{from:this.state.account});
+    // var gid = await battleship.methods.retid().call({from:this.state.account});
+    // console.log(gid)
+    // var topush = {
+    //   gameId : gid
+    // }
+    // firebase.database().ref('/gameId').push(topush);
+    this.details();
+    this.setState({gameState:4})
+    // this.setState({g_id:gid})
     
   }
-  joinGame() {
-    const instance = firebase.database().ref('gameId');
-    instance.on('value', async (snapshot) => {
-      let idx = snapshot.val();
-      if(idx == null){
-        alert('Oh! no players are there!!')
-        return;
-      }
-      let ids = Object.values(idx)
-      if(ids.length == 0){
-        alert('Oh! no players are there!!')
-        return;
-      }
-      else{
-      this.setState({gids:ids})
-      this.setState({g_id:ids[0]['gameId']})
-      await this.state.btship.methods.joinGame(ids[0]['gameId']).send(10000, {from:this.state.account});
-      // firebase.database().ref({idx}).remove();
-      this.setState({gameState:2})}
+  async joinGame(){
+    // const instance = firebase.database().ref('gameId');
+    // instance.on('value', async (snapshot) => {
+    //   let idx = snapshot.val();
+    //   if(idx == null){
+    //     alert('Oh! no players are there!!')
+    //     return;
+    //   }
+    //   let ids = Object.values(idx)
+    //   if(ids.length == 0){
+    //     alert('Oh! no players are there!!')
+    //     return;
+    //   }
+    //   else{
+    //     this.setState({gids:ids})
+    //     var ln = ids.length;
+    //     this.setState({g_id:ids[ln-1]['gameId']})
+    //     console.log("gameid - ", ids[ln-1]['gameId']);
+    //     await battleship.methods.joinGame(ids[ln-1]['gameId']).send(10000, {from:this.state.account});
+            this.details();    
+            this.setState({gameState:4});
+      // }
       
-    });
+    // });
     
   }
   
@@ -120,7 +117,7 @@ class App extends React.Component {
     console.log(this.state.gids[0]['gameId'])
   }
   async enterName(){
-    await this.state.btship.methods.setName(this.state.pname).send({from:this.state.account});
+    await battleship.methods.setName(this.state.pname).send({from:this.state.account});
   }
   
   handleChange = (event) => {
@@ -138,6 +135,18 @@ class App extends React.Component {
     this.setState({
       [name] : value
     })    
+  }
+  async makeMoves(event){
+    const moves = this.state.move.split(" ");
+    if(moves.length != 2){
+      alert('put cords correctly');
+      return;
+    }
+    let x = moves[0];
+    let y = moves[1];
+    await battleship.methods.makeMove(232, x, y).send({from:this.state.account});
+    // await battleship.methods.makeMove(this.state.g_id, x, y).call({from:this.state.account});
+    this.details();
   }
   async handleSubmit(event){
     const ship5 = this.state.size5.split(" ");
@@ -160,15 +169,15 @@ class App extends React.Component {
       alert('put cords correctly')
       return;
     } 
-    await this.state.btship.methods.placeShip(this.state.g_id,ship5[0],ship5[1],ship5[2],ship5[3]).send({from: this.state.account});
-    var out = await this.state.btship.methods.finishPlacing(this.state.g_id).call({from:this.state.account})
+    await battleship.methods.placeShip(this.state.g_id,ship5[0],ship5[1],ship5[2],ship5[3]).send({from: this.state.account});
+    var out = await battleship.methods.finishPlacing(this.state.g_id).call({from:this.state.account})
     
     while(out==false){
-      out = await this.state.btship.methods.finishPlacing(this.state.g_id).call({from:this.state.account})
-      console.log(out)
-      this.setState({gameState:3})
+      out = await battleship.methods.finishPlacing(this.state.g_id).call({from:this.state.account})
+      this.setState({gameState:3});
     }
-    this.setState({gameState:4})
+    this.details();
+    this.setState({gameState:4});
   }
   async _next(){
     let currentStep = this.state.currentStep
@@ -178,11 +187,7 @@ class App extends React.Component {
         alert('put cords correctly')
         return;
       }
-      var cpl = await this.state.btship.methods.findOtherPlayer(this.state.g_id, this.state.account).call({from:this.state.account});
-      console.log('cpl');
-      console.log(cpl);
-      console.log('this.state.account');
-      console.log(this.state.account);
+      // var cpl = await battleship.methods.findOtherPlayer(this.state.g_id, this.state.account).call({from:this.state.account});
       let startX = ship2[0];
       let endX = ship2[1];
       let startY = ship2[2];
@@ -198,13 +203,9 @@ class App extends React.Component {
         alert('put cords correctly')
         return;
       } 
-      await this.state.btship.methods.placeShip(this.state.g_id,ship2[0],ship2[1],ship2[2],ship2[3]).send({from: this.state.account});
-      //  function(error,thash){
-      //    console.log(error);
-      //    console.log("erro");
-      //    console.log(thash);
+      await battleship.methods.placeShip(this.state.g_id,ship2[0],ship2[1],ship2[2],ship2[3]).send({from: this.state.account});
     }
-    if( currentStep==2){
+    if(currentStep==2){
       const ship3 = this.state.size3.split(" ")
       if(ship3.length != 4){
         alert('put cords correctly')
@@ -225,7 +226,7 @@ class App extends React.Component {
         alert('put cords correctly')
         return;
       } 
-      await this.state.btship.methods.placeShip(this.state.g_id,ship3[0],ship3[1],ship3[2],ship3[3]).send({from: this.state.account});
+      await battleship.methods.placeShip(this.state.g_id,ship3[0],ship3[1],ship3[2],ship3[3]).send({from: this.state.account});
     }
     if( currentStep==3){
       const ship4 = this.state.size4.split(" ")
@@ -249,7 +250,7 @@ class App extends React.Component {
         alert('put cords correctly')
         return;
       } 
-      await this.state.btship.methods.placeShip(this.state.g_id,ship4[0],ship4[1],ship4[2],ship4[3]).send({from: this.state.account});
+      await battleship.methods.placeShip(this.state.g_id,ship4[0],ship4[1],ship4[2],ship4[3]).send({from: this.state.account});
     }  
     if( currentStep==4){
       const ship5 = this.state.size5.split(" ")
@@ -257,7 +258,7 @@ class App extends React.Component {
         alert('put cords correctly')
         return;
       }
-      await this.state.btship.methods.placeShip(this.state.g_id,ship5[0],ship5[1],ship5[2],ship5[3]).send({from: this.state.account});
+      await battleship.methods.placeShip(this.state.g_id,ship5[0],ship5[1],ship5[2],ship5[3]).send({from: this.state.account});
 
     }
     currentStep = currentStep >= 3? 4: currentStep + 1
@@ -302,35 +303,61 @@ class App extends React.Component {
     }
     return null;
   }
+  async details(){
+    // let curplayer = await battleship.methods.status(this.state.g_id).call({from:this.state.account});
+    // let win = await battleship.methods.winner(this.state.g_id).call();
+    // let opp = await battleship.methods.findOtherPlayer(this.state.g_id, this.state.account).call();
+    
+    let curplayer = await battleship.methods.status(232).call({from:this.state.account});
+    let win = await battleship.methods.winner(232).call();
+    let opp = await battleship.methods.findOtherPlayer(232  , this.state.account).call();
+    
+    this.setState({currentPlayer : curplayer});
+    this.setState({Winner : win});
+    this.setState({Opponent : opp});
+  }
   headers=()=>{
-    let curplayer = this.state.btship.methods.status(this.state.g_id).call({from:this.state.account});
-    if(curplayer == this.state.account){
+    this.details();
+    console.log("winner - ", this.state.Winner);
+    console.log("opp - ", this.state.Opponent);
+    console.log("curpl - ", this.state.currentPlayer);
+    if(this.state.Winner==this.state.account){
+      var topush = {
+        gameId : this.state.g_id,
+        winner : this.state.winner
+      }
+      firebase.database().ref('/windata').push(topush);
       return(
-        <h1 className="form-heading">Its Your turn </h1>
+        <h1 className="form-heading"> Congrats You Won, bet Money will be transfered to your Account </h1>
+      );
+    }
+    else if(this.state.Winner == this.state.Opponent){
+      return(
+        <h1 className="form-heading"> Your opponent won the game! Better luck next time </h1>
       );
     }
     else{
-      return(
-        <h1 className="form-heading">Wait for opponents turn</h1>
-      );
+      if(this.state.currentPlayer == this.state.account){
+        return(
+          <h1 className="form-heading">Its Your turn </h1>
+        );
+      }
+      else{
+        return(
+          <h1 className="form-heading">Wait for opponents turn</h1>
+        );
+      }
     }
   }
   moveBtn=()=>{
-    let curplayer = this.state.btship.methods.status(this.state.g_id).call({from:this.state.account});
-    if(curplayer == this.state.account){
+    console.log("curplayer - ", this.state.currentPlayer)
+    if(this.state.currentPlayer == this.state.account){
       return (
         <ButtonGroup variant="contained" color="primary" size="large" aria-label="full-width contained primary button group">
-        <Button onClick = {()=>this._next()} >Doit!</Button>
+        <Button onClick = {()=>this.makeMoves()} >Doit!</Button>
       </ButtonGroup>
       )
     }
-    // else{
-    //   return (
-    //     <ButtonGroup variant="contained" color="primary" size="large" aria-label="full-width contained primary button group">
-    //     <Button onClick = {()=>alert('Not your turn mate')} >Doit!</Button>
-    //   </ButtonGroup>
-    //   )
-    // }
     return null;
   }
 

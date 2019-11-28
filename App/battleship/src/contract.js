@@ -1,34 +1,8 @@
 import web3 from './web3'
 
-const deployeAddress = '0x2c41de68788412d9cf3ec1928c215f4b5ed2ef02';
+const deployeAddress = '0x42E33440c235531E026936d35e205472A4BCeDE0';
 
 const deployedAbi = [
-	{
-		"constant": true,
-		"inputs": [
-			{
-				"internalType": "bytes32",
-				"name": "gameId",
-				"type": "bytes32"
-			},
-			{
-				"internalType": "address",
-				"name": "player",
-				"type": "address"
-			}
-		],
-		"name": "findOtherPlayer",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	},
 	{
 		"constant": true,
 		"inputs": [
@@ -46,13 +20,110 @@ const deployedAbi = [
 		"name": "playerGames",
 		"outputs": [
 			{
-				"internalType": "bytes32",
+				"internalType": "uint256",
 				"name": "",
-				"type": "bytes32"
+				"type": "uint256"
 			}
 		],
 		"payable": false,
 		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "games",
+		"outputs": [
+			{
+				"internalType": "address payable",
+				"name": "p1",
+				"type": "address"
+			},
+			{
+				"internalType": "address payable",
+				"name": "p2",
+				"type": "address"
+			},
+			{
+				"internalType": "string",
+				"name": "p1_name",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "p2_name",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "currentPlayer",
+				"type": "address"
+			},
+			{
+				"internalType": "address payable",
+				"name": "winner",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "pot",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "availablePot",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "gameId",
+				"type": "uint256"
+			}
+		],
+		"name": "winner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "gameId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "player",
+				"type": "address"
+			}
+		],
+		"name": "initialiseBoard",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{
@@ -65,13 +136,7 @@ const deployedAbi = [
 			}
 		],
 		"name": "newGame",
-		"outputs": [
-			{
-				"internalType": "bytes32",
-				"name": "",
-				"type": "bytes32"
-			}
-		],
+		"outputs": [],
 		"payable": true,
 		"stateMutability": "payable",
 		"type": "function"
@@ -80,17 +145,17 @@ const deployedAbi = [
 		"constant": true,
 		"inputs": [
 			{
-				"internalType": "bytes32",
+				"internalType": "uint256",
 				"name": "gameId",
-				"type": "bytes32"
+				"type": "uint256"
 			}
 		],
-		"name": "findPot",
+		"name": "status",
 		"outputs": [
 			{
-				"internalType": "uint256",
+				"internalType": "address",
 				"name": "",
-				"type": "uint256"
+				"type": "address"
 			}
 		],
 		"payable": false,
@@ -119,47 +184,22 @@ const deployedAbi = [
 		"type": "function"
 	},
 	{
-		"constant": true,
-		"inputs": [
-			{
-				"internalType": "bytes32",
-				"name": "gameId",
-				"type": "bytes32"
-			}
-		],
-		"name": "status",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
 		"constant": false,
 		"inputs": [
 			{
-				"internalType": "bytes32",
+				"internalType": "uint256",
 				"name": "gameId",
-				"type": "bytes32"
-			},
-			{
-				"internalType": "uint8",
-				"name": "x",
-				"type": "uint8"
-			},
-			{
-				"internalType": "uint8",
-				"name": "y",
-				"type": "uint8"
+				"type": "uint256"
 			}
 		],
-		"name": "makeMove",
-		"outputs": [],
+		"name": "finishPlacing",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
 		"payable": false,
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -168,29 +208,13 @@ const deployedAbi = [
 		"constant": false,
 		"inputs": [
 			{
-				"internalType": "bytes32",
+				"internalType": "uint256",
 				"name": "gameId",
-				"type": "bytes32"
-			},
-			{
-				"internalType": "uint256",
-				"name": "x",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "y",
 				"type": "uint256"
 			}
 		],
-		"name": "showOtherPlayerBoard",
-		"outputs": [
-			{
-				"internalType": "int256",
-				"name": "",
-				"type": "int256"
-			}
-		],
+		"name": "sayWon",
+		"outputs": [],
 		"payable": false,
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -198,87 +222,16 @@ const deployedAbi = [
 	{
 		"constant": true,
 		"inputs": [],
-		"name": "returngameid",
+		"name": "retid",
 		"outputs": [
 			{
-				"internalType": "bytes32",
+				"internalType": "uint256",
 				"name": "",
-				"type": "bytes32"
+				"type": "uint256"
 			}
 		],
 		"payable": false,
 		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"constant": false,
-		"inputs": [
-			{
-				"internalType": "bytes32",
-				"name": "gameId",
-				"type": "bytes32"
-			}
-		],
-		"name": "withdraw",
-		"outputs": [],
-		"payable": true,
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
-		"constant": true,
-		"inputs": [
-			{
-				"internalType": "bytes32",
-				"name": "x",
-				"type": "bytes32"
-			}
-		],
-		"name": "bytes32ToString",
-		"outputs": [
-			{
-				"internalType": "string",
-				"name": "",
-				"type": "string"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"constant": false,
-		"inputs": [
-			{
-				"internalType": "bytes32",
-				"name": "gameId",
-				"type": "bytes32"
-			},
-			{
-				"internalType": "uint8",
-				"name": "startX",
-				"type": "uint8"
-			},
-			{
-				"internalType": "uint8",
-				"name": "endX",
-				"type": "uint8"
-			},
-			{
-				"internalType": "uint8",
-				"name": "startY",
-				"type": "uint8"
-			},
-			{
-				"internalType": "uint8",
-				"name": "endY",
-				"type": "uint8"
-			}
-		],
-		"name": "placeShip",
-		"outputs": [],
-		"payable": false,
-		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{
@@ -297,34 +250,28 @@ const deployedAbi = [
 		"type": "function"
 	},
 	{
-		"constant": true,
+		"constant": false,
 		"inputs": [
 			{
-				"internalType": "bytes32",
+				"internalType": "uint256",
 				"name": "gameId",
-				"type": "bytes32"
+				"type": "uint256"
 			},
 			{
-				"internalType": "uint256",
+				"internalType": "uint8",
 				"name": "x",
-				"type": "uint256"
+				"type": "uint8"
 			},
 			{
-				"internalType": "uint256",
+				"internalType": "uint8",
 				"name": "y",
-				"type": "uint256"
+				"type": "uint8"
 			}
 		],
-		"name": "showBoard",
-		"outputs": [
-			{
-				"internalType": "int256",
-				"name": "",
-				"type": "int256"
-			}
-		],
+		"name": "makeMove",
+		"outputs": [],
 		"payable": false,
-		"stateMutability": "view",
+		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{
@@ -367,21 +314,6 @@ const deployedAbi = [
 		"constant": false,
 		"inputs": [
 			{
-				"internalType": "bytes32",
-				"name": "gameId",
-				"type": "bytes32"
-			}
-		],
-		"name": "joinGame",
-		"outputs": [],
-		"payable": true,
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
-		"constant": false,
-		"inputs": [
-			{
 				"internalType": "string",
 				"name": "name",
 				"type": "string"
@@ -415,96 +347,25 @@ const deployedAbi = [
 		"type": "function"
 	},
 	{
-		"constant": false,
-		"inputs": [
-			{
-				"internalType": "bytes32",
-				"name": "gameId",
-				"type": "bytes32"
-			}
-		],
-		"name": "finishPlacing",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"payable": false,
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"constant": false,
-		"inputs": [
-			{
-				"internalType": "bytes32",
-				"name": "gameId",
-				"type": "bytes32"
-			}
-		],
-		"name": "sayWon",
-		"outputs": [],
-		"payable": false,
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
 		"constant": true,
 		"inputs": [
 			{
-				"internalType": "bytes32",
-				"name": "",
-				"type": "bytes32"
-			}
-		],
-		"name": "games",
-		"outputs": [
-			{
-				"internalType": "address payable",
-				"name": "player1",
-				"type": "address"
-			},
-			{
-				"internalType": "address payable",
-				"name": "player2",
-				"type": "address"
-			},
-			{
-				"internalType": "string",
-				"name": "player1Name",
-				"type": "string"
-			},
-			{
-				"internalType": "string",
-				"name": "player2Name",
-				"type": "string"
+				"internalType": "uint256",
+				"name": "gameId",
+				"type": "uint256"
 			},
 			{
 				"internalType": "address",
-				"name": "currentPlayer",
+				"name": "player",
 				"type": "address"
-			},
+			}
+		],
+		"name": "findOtherPlayer",
+		"outputs": [
 			{
-				"internalType": "address payable",
-				"name": "winner",
+				"internalType": "address",
+				"name": "",
 				"type": "address"
-			},
-			{
-				"internalType": "enum battleship.GameState",
-				"name": "gameState",
-				"type": "uint8"
-			},
-			{
-				"internalType": "uint256",
-				"name": "pot",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "availablePot",
-				"type": "uint256"
 			}
 		],
 		"payable": false,
@@ -512,379 +373,54 @@ const deployedAbi = [
 		"type": "function"
 	},
 	{
-		"anonymous": false,
+		"constant": false,
 		"inputs": [
 			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "player",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "string",
-				"name": "name",
-				"type": "string"
-			}
-		],
-		"name": "PlayerSetName",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "bytes32",
-				"name": "gameId",
-				"type": "bytes32"
-			},
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "player1",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "bool",
-				"name": "player1GoesFirst",
-				"type": "bool"
-			},
-			{
-				"indexed": false,
 				"internalType": "uint256",
-				"name": "pot",
+				"name": "gameId",
 				"type": "uint256"
 			}
 		],
-		"name": "GameInitialized",
-		"type": "event"
+		"name": "joinGame",
+		"outputs": [],
+		"payable": true,
+		"stateMutability": "payable",
+		"type": "function"
 	},
 	{
-		"anonymous": false,
+		"constant": false,
 		"inputs": [
 			{
-				"indexed": false,
-				"internalType": "bytes32",
+				"internalType": "uint256",
 				"name": "gameId",
-				"type": "bytes32"
+				"type": "uint256"
 			},
 			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "player2",
-				"type": "address"
-			}
-		],
-		"name": "GameJoined",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "bytes32",
-				"name": "gameId",
-				"type": "bytes32"
-			},
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "player",
-				"type": "address"
-			},
-			{
-				"indexed": false,
 				"internalType": "uint8",
 				"name": "startX",
 				"type": "uint8"
 			},
 			{
-				"indexed": false,
 				"internalType": "uint8",
 				"name": "endX",
 				"type": "uint8"
 			},
 			{
-				"indexed": false,
 				"internalType": "uint8",
 				"name": "startY",
 				"type": "uint8"
 			},
 			{
-				"indexed": false,
 				"internalType": "uint8",
 				"name": "endY",
 				"type": "uint8"
 			}
 		],
-		"name": "ShipPlaced",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "bytes32",
-				"name": "gameId",
-				"type": "bytes32"
-			},
-			{
-				"indexed": false,
-				"internalType": "enum battleship.GameState",
-				"name": "newState",
-				"type": "uint8"
-			},
-			{
-				"indexed": false,
-				"internalType": "string",
-				"name": "newStateString",
-				"type": "string"
-			}
-		],
-		"name": "StateChanged",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "string",
-				"name": "testing",
-				"type": "string"
-			},
-			{
-				"indexed": false,
-				"internalType": "bytes32",
-				"name": "gameId",
-				"type": "bytes32"
-			}
-		],
-		"name": "GameMade",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "bytes32",
-				"name": "gameId",
-				"type": "bytes32"
-			},
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "currentPlayer",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint8",
-				"name": "x",
-				"type": "uint8"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint8",
-				"name": "y",
-				"type": "uint8"
-			}
-		],
-		"name": "MadeMove",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "bytes32",
-				"name": "gameId",
-				"type": "bytes32"
-			},
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "currentPlayer",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint8",
-				"name": "x",
-				"type": "uint8"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint8",
-				"name": "y",
-				"type": "uint8"
-			},
-			{
-				"indexed": false,
-				"internalType": "int8",
-				"name": "pieceHit",
-				"type": "int8"
-			}
-		],
-		"name": "HitBattleShip",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "bytes32",
-				"name": "gameId",
-				"type": "bytes32"
-			},
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "player",
-				"type": "address"
-			}
-		],
-		"name": "WonChallenged",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "bytes32",
-				"name": "gameId",
-				"type": "bytes32"
-			},
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "winner",
-				"type": "address"
-			}
-		],
-		"name": "GameEnded",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "bytes32",
-				"name": "gameId",
-				"type": "bytes32"
-			},
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "player",
-				"type": "address"
-			}
-		],
-		"name": "WinningsWithdrawn",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "bytes32",
-				"name": "gameId",
-				"type": "bytes32"
-			},
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "player",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "string",
-				"name": "reason",
-				"type": "string"
-			}
-		],
-		"name": "WithdrawFailed",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "bytes32",
-				"name": "gameId",
-				"type": "bytes32"
-			},
-			{
-				"indexed": false,
-				"internalType": "enum battleship.GameState",
-				"name": "currentState",
-				"type": "uint8"
-			},
-			{
-				"indexed": false,
-				"internalType": "enum battleship.GameState",
-				"name": "comparingState",
-				"type": "uint8"
-			},
-			{
-				"indexed": false,
-				"internalType": "bool",
-				"name": "equal",
-				"type": "bool"
-			}
-		],
-		"name": "IsStateCalled",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "bytes32",
-				"name": "gameId",
-				"type": "bytes32"
-			},
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "player",
-				"type": "address"
-			}
-		],
-		"name": "IsPlayerCalled",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "bytes32",
-				"name": "gameId",
-				"type": "bytes32"
-			},
-			{
-				"indexed": false,
-				"internalType": "enum battleship.GameState",
-				"name": "state",
-				"type": "uint8"
-			}
-		],
-		"name": "LogCurrentState",
-		"type": "event"
+		"name": "placeShip",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
 	}
 ]
 export default new web3.eth.Contract(deployedAbi,deployeAddress,{  gasLimit: "1000000"  });
