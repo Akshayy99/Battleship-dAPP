@@ -39,7 +39,7 @@ class App extends React.Component {
     size3:  '',
     size4:  '',
     size5:  '',
-    g_id : '',
+    g_id : 232,
     move : '',
     currentPlayer : '',
     Opp : '',
@@ -81,7 +81,7 @@ class App extends React.Component {
     //   gameId : gid
     // }
     // firebase.database().ref('/gameId').push(topush);
-    this.details();
+    this.details()
     this.setState({gameState:4})
     // this.setState({g_id:gid})
     
@@ -105,9 +105,10 @@ class App extends React.Component {
     //     this.setState({g_id:ids[ln-1]['gameId']})
     //     console.log("gameid - ", ids[ln-1]['gameId']);
     //     await battleship.methods.joinGame(ids[ln-1]['gameId']).send(10000, {from:this.state.account});
-            this.details();    
+    //         // setInterval(this.details,1000);
+            this.details();
             this.setState({gameState:4});
-      // }
+    //   }
       
     // });
     
@@ -304,23 +305,19 @@ class App extends React.Component {
     return null;
   }
   async details(){
-    // let curplayer = await battleship.methods.status(this.state.g_id).call({from:this.state.account});
-    // let win = await battleship.methods.winner(this.state.g_id).call();
-    // let opp = await battleship.methods.findOtherPlayer(this.state.g_id, this.state.account).call();
-    
-    let curplayer = await battleship.methods.status(232).call({from:this.state.account});
-    let win = await battleship.methods.winner(232).call();
-    let opp = await battleship.methods.findOtherPlayer(232  , this.state.account).call();
+    let curplayer = await battleship.methods.status(this.state.g_id).call({from:this.state.account});
+    let win = await battleship.methods.winner(this.state.g_id).call();
+    let opp = await battleship.methods.findOtherPlayer(this.state.g_id, this.state.account).call();
     
     this.setState({currentPlayer : curplayer});
     this.setState({Winner : win});
     this.setState({Opponent : opp});
   }
   headers=()=>{
-    this.details();
-    console.log("winner - ", this.state.Winner);
-    console.log("opp - ", this.state.Opponent);
-    console.log("curpl - ", this.state.currentPlayer);
+    // this.details();
+    // console.log("winner - ", this.state.Winner);
+    // console.log("opp - ", this.state.Opponent);
+    // console.log("curpl - ", this.state.currentPlayer);
     if(this.state.Winner==this.state.account){
       var topush = {
         gameId : this.state.g_id,
@@ -342,19 +339,31 @@ class App extends React.Component {
           <h1 className="form-heading">Its Your turn </h1>
         );
       }
-      else{
+      else if(this.state.currentPlayer == this.state.Opponent){
         return(
           <h1 className="form-heading">Wait for opponents turn</h1>
+        );
+      }
+      else{
+        return(
+          <h1 className="form-heading">You seem to have entered in wrong game</h1>
         );
       }
     }
   }
   moveBtn=()=>{
-    console.log("curplayer - ", this.state.currentPlayer)
+    // console.log("curplayer - ", this.state.currentPlayer)
     if(this.state.currentPlayer == this.state.account){
       return (
         <ButtonGroup variant="contained" color="primary" size="large" aria-label="full-width contained primary button group">
         <Button onClick = {()=>this.makeMoves()} >Doit!</Button>
+      </ButtonGroup>
+      )
+    }
+    else{
+      return (
+        <ButtonGroup variant="contained" color="primary" size="large" aria-label="full-width contained primary button group">
+        <Button onClick = {()=>this.details()} >Refresh</Button>
       </ButtonGroup>
       )
     }
